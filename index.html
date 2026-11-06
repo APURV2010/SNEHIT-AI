@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APURV AI</title>
+<style>
+body {
+  background: #030b18;
+  color: #00d9ff;
+  font-family: Arial;
+  text-align: center;
+  padding: 25px;
+}
+h1 {
+  margin-top: 35px;
+  letter-spacing: 5px;
+}
+.circle {
+  width: 190px;
+  height: 190px;
+  border: 3px solid #00d9ff;
+  border-radius: 50%;
+  margin: 55px auto 25px;
+  box-shadow: 0 0 30px #00d9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+}
+button {
+  background: #00d9ff;
+  color: #00101c;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 17px;
+  margin: 10px;
+}
+#answer {
+  color: white;
+  margin-top: 30px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<h1>APURV AI</h1>
+<p>PERSONAL VOICE ASSISTANT</p>
+
+<div class="circle">J.A.R.V.I.S</div>
+
+<button onclick="startListening()">🎙 START JARVIS</button>
+<button onclick="stopListening()">STOP</button>
+
+<p id="status">System Ready</p>
+<p id="answer">Hello! I am your personal assistant.</p>
+
+
+<script>
+const statusText = document.getElementById("status");
+const answerText = document.getElementById("answer");
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+let recognition;
+
+function speak(text) {
+  speechSynthesis.cancel();
+
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "mr-IN";
+  msg.rate = 0.95;
+  msg.pitch = 1;
+
+  const voices = speechSynthesis.getVoices();
+
+  const marathiVoice = voices.find(v =>
+    v.lang.toLowerCase().startsWith("mr")
+  );
+
+  if (marathiVoice) {
+    msg.voice = marathiVoice;
+  }
+
+  msg.onend = () => {
+    statusText.innerText = "मी ऐकण्यासाठी तयार आहे.";
+  };
+
+  answerText.innerText = text;
+  speechSynthesis.speak(msg);
+}
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+
+  recognition.lang = "mr-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    statusText.innerText = "बोल, मी ऐकतोय...";
+  };
+
+  recognition.onresult = (event) => {
+    const command =
+      event.results[0][0].transcript.toLowerCase().trim();
+
+    answerText.innerText = "तू: " + command;
+
+    processCommand(command);
+  };
+
+  recognition.onerror = (event) => {
+    statusText.innerText = "आवाज समजला नाही. पुन्हा बोल.";
+  };
+
+  recognition.onend = () => {
+    if (statusText.innerText !== "बोल, मी ऐकतोय...") {
+      statusText.innerText = "मी तयार आहे.";
+    }
+  };
+}
+
+function startListening() {
+  if (!recognition) {
+    speak("तुझ्या ब्राउझरमध्ये आवाज ओळखण्याची सुविधा उपलब्ध नाही.");
+    return;
+  }
+
+  try {
+    recognition.start();
+  } catch (e) {
+    statusText.innerText = "थोडा वेळ थांब आणि पुन्हा प्रयत्न कर.";
+  }
+}
+
+function stopListening() {
+  if (recognition) recognition.stop();
+
+  speechSynthesis.cancel();
+  statusText.innerText = "मी थांबलो आहे.";
+}
+
+function processCommand(command) {
+
+  if (command.includes("hello") ||
+      command.includes("नमस्कार") ||
+      command.includes("हॅलो")) {
+
+    speak("नमस्कार अपूर्व! काय म्हणतोस? आज काय मदत करू?");
+  }
+
+  else if (command.includes("तुझं नाव") ||
+           command.includes("तुझे नाव")) {
+
+    speak("माझं नाव अपूर्व ए आय आहे. मी तुझा वैयक्तिक सहाय्यक आहे.");
+  }
+
+  else if (command.includes("कसा आहेस") ||
+           command.includes("काय म्हणतोस")) {
+
+    speak("मी एकदम छान आहे. तू कसा आहेस अपूर्व?");
+  }
+
+  else if (command.includes("वेळ") ||
+           command.includes("किती वाजले")) {
+
+    speak("आत्ता वाजले आहेत " +
+      new Date().toLocaleTimeString("mr-IN"));
+  }
+
+  else if (command.includes("आजची तारीख") ||
+           command.includes("तारीख")) {
+
+    speak("आजची तारीख आहे " +
+      new Date().toLocaleDateString("mr-IN"));
+  }
+
+  else if (command.includes("मी कोण")) {
+
+    speak("तू अपूर्व आहेस आणि मी तुझा ए आय सहाय्यक आहे.");
+  }
+
+  else if (command.includes("धन्यवाद")) {
+
+    speak("अरे काही नाही! तुझ्या मदतीसाठी मी नेहमी तयार आहे.");
+  }
+
+  else if (command.includes("बंद हो") ||
+           command.includes("थांब")) {
+
+    stopListening();
+    speak("ठीक आहे अपूर्व. मी थांबतो.");
+  }
+
+  else {
+
+    speak("माफ कर अपूर्व, मला तुझं बोलणं समजलं नाही. पुन्हा सांगशील का?");
+  }
+}
+</script>
+
+</body>
+</html>
