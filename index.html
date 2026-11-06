@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APURV AI</title>
+<style>
+body {
+  background: #030b18;
+  color: #00d9ff;
+  font-family: Arial;
+  text-align: center;
+  padding: 25px;
+}
+h1 {
+  margin-top: 35px;
+  letter-spacing: 5px;
+}
+.circle {
+  width: 190px;
+  height: 190px;
+  border: 3px solid #00d9ff;
+  border-radius: 50%;
+  margin: 55px auto 25px;
+  box-shadow: 0 0 30px #00d9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+}
+button {
+  background: #00d9ff;
+  color: #00101c;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 17px;
+  margin: 10px;
+}
+#answer {
+  color: white;
+  margin-top: 30px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<h1>APURV AI</h1>
+<p>PERSONAL VOICE ASSISTANT</p>
+
+<div class="circle">J.A.R.V.I.S</div>
+
+<button onclick="startListening()">🎙 START JARVIS</button>
+<button onclick="stopListening()">STOP</button>
+
+<p id="status">System Ready</p>
+<p id="answer">Hello! I am your personal assistant.</p>
+
+<script>
+const statusText = document.getElementById("status");
+const answerText = document.getElementById("answer");
+
+function speak(text) {
+  speechSynthesis.cancel();
+  let msg = new SpeechSynthesisUtterance(text);
+  msg.lang = "en-IN";
+  speechSynthesis.speak(msg);
+  answerText.innerText = text;
+}
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+let recognition;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    statusText.innerText = "Listening...";
+  };
+
+  recognition.onend = () => {
+    statusText.innerText = "System Ready";
+  };
+
+  recognition.onresult = (event) => {
+    let command =
+      event.results[0][0].transcript.toLowerCase();
+
+    answerText.innerText = "You: " + command;
+    processCommand(command);
+  };
+
+  recognition.onerror = () => {
+    statusText.innerText = "Microphone Error";
+  };
+}
+
+function startListening() {
+  if (!recognition) {
+    speak("Speech recognition is not supported.");
+    return;
+  }
+  recognition.start();
+}
+
+function stopListening() {
+  if (recognition) recognition.stop();
+  speechSynthesis.cancel();
+  statusText.innerText = "System Stopped";
+}
+
+function processCommand(command) {
+
+  if (command.includes("hello")) {
+    speak("Hello Apurv. How can I help you?");
+  }
+
+  else if (command.includes("your name")) {
+    speak("I am Apurv AI, your personal assistant.");
+  }
+
+  else if (command.includes("time")) {
+    speak("The time is " +
+      new Date().toLocaleTimeString());
+  }
+
+  else if (command.includes("date")) {
+    speak("Today's date is " +
+      new Date().toLocaleDateString());
+  }
+
+  else if (command.includes("who am i")) {
+    speak("You are Apurv.");
+  }
+
+  else if (command.includes("stop")) {
+    stopListening();
+  }
+
+  else {
+    speak("I have not learned this command yet.");
+  }
+}
+</script>
+
+</body>
+</html>
