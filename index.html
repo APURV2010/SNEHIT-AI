@@ -1,0 +1,494 @@
+
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#030b18">
+<title>SNEHIT AI</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #030b18;
+  color: #d9f7ff;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
+
+header {
+  text-align: center;
+  padding: 22px 10px;
+  border-bottom: 1px solid #123c55;
+}
+
+header h1 {
+  color: #00d9ff;
+  letter-spacing: 5px;
+  margin: 5px;
+  text-shadow: 0 0 15px #00bfff;
+}
+
+header p {
+  color: #75aabd;
+  font-size: 11px;
+  letter-spacing: 3px;
+}
+
+.status {
+  color: #00e5a0;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.core {
+  width: 155px;
+  height: 155px;
+  margin: 30px auto 15px;
+  border: 2px solid #00d9ff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 45px;
+  color: #00d9ff;
+  box-shadow: 0 0 20px #007caa,
+              inset 0 0 25px #005477;
+  animation: pulse 3s infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: 0 0 35px #00d9ff,
+                inset 0 0 35px #006c99;
+  }
+}
+
+.panel {
+  margin: 18px auto;
+  width: 92%;
+  max-width: 600px;
+  background: #071626;
+  border: 1px solid #16445b;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.panel h3 {
+  color: #00d9ff;
+  margin-top: 0;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+#chat {
+  height: 230px;
+  overflow-y: auto;
+  padding: 8px;
+  background: #030d19;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.message {
+  margin: 9px 0;
+  padding: 9px;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.user {
+  background: #10364b;
+  color: #bdefff;
+}
+
+.bot {
+  background: #10251f;
+  color: #aaffd5;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #176080;
+  background: #030d19;
+  color: white;
+  font-size: 15px;
+}
+
+button {
+  padding: 12px 17px;
+  margin: 5px 3px;
+  border: 1px solid #00bde8;
+  border-radius: 8px;
+  background: #06334a;
+  color: #00d9ff;
+  font-size: 13px;
+}
+
+button:active {
+  background: #08708e;
+}
+
+.buttons {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.small {
+  color: #789cac;
+  font-size: 11px;
+  text-align: center;
+}
+
+#memoryList {
+  font-size: 13px;
+  color: #bdefff;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #547487;
+  font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>SNEHIT AI</h1>
+  <p>YOUR INTELLIGENT COMPANION</p>
+</header>
+
+<div class="status" id="status">
+  ● SYSTEM ONLINE
+</div>
+
+<div class="core" id="core">S</div>
+
+<div class="small">
+  PERSONAL AI ASSISTANT
+</div>
+
+<section class="panel">
+  <h3>CONVERSATION</h3>
+
+  <div id="chat">
+    <div class="message bot">
+      नमस्कार! मी स्नेहित आहे.
+      आज मी तुझी काय मदत करू?
+    </div>
+  </div>
+
+  <input
+    id="message"
+    placeholder="इथे तुझा प्रश्न लिही..."
+    autocomplete="off"
+  >
+
+  <div class="buttons">
+    <button onclick="sendMessage()">SEND</button>
+    <button onclick="startVoice()">🎙 VOICE</button>
+    <button onclick="stopVoice()">STOP</button>
+  </div>
+</section>
+
+<section class="panel">
+  <h3>PERSONAL MEMORY</h3>
+
+  <p class="small">
+    तू स्पष्टपणे सांगितलेली माहिती या डिव्हाइसमध्ये जतन होईल.
+  </p>
+
+  <div id="memoryList">
+    Memory system ready.
+  </div>
+
+  <div class="buttons">
+    <button onclick="showMemory()">VIEW MEMORY</button>
+    <button onclick="clearMemory()">CLEAR MEMORY</button>
+  </div>
+</section>
+
+<section class="panel">
+  <h3>SYSTEM INFORMATION</h3>
+  <p id="systemInfo">SNEHIT CORE: READY</p>
+  <p class="small">Local commands and device memory</p>
+</section>
+
+<footer>
+  SNEHIT AI · PERSONAL ASSISTANT
+</footer>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+const statusText = document.getElementById("status");
+const core = document.getElementById("core");
+
+let recognition = null;
+
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = "message " + type;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+
+  speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "mr-IN";
+  speech.rate = 0.95;
+
+  speechSynthesis.speak(speech);
+}
+
+function reply(text) {
+  addMessage(text, "bot");
+  speak(text);
+}
+
+function getMemory() {
+  try {
+    return JSON.parse(
+      localStorage.getItem("snehit_memory") || "[]"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function saveMemory(value) {
+  const memories = getMemory();
+  memories.push(value);
+
+  localStorage.setItem(
+    "snehit_memory",
+    JSON.stringify(memories)
+  );
+}
+
+function showMemory() {
+  const memories = getMemory();
+  const area = document.getElementById("memoryList");
+
+  if (!memories.length) {
+    area.textContent = "अजून कोणतीही आठवण जतन केलेली नाही.";
+    return;
+  }
+
+  area.textContent = memories
+    .map((item, index) => (index + 1) + ". " + item)
+    .join("\n");
+  area.style.whiteSpace = "pre-line";
+}
+
+function clearMemory() {
+  const confirmClear = confirm(
+    "तुला SNEHIT मधील सर्व जतन केलेल्या आठवणी पुसायच्या आहेत का?"
+  );
+
+  if (confirmClear) {
+    localStorage.removeItem("snehit_memory");
+    showMemory();
+    reply("ठीक आहे. जतन केलेल्या आठवणी पुसल्या आहेत.");
+  }
+}
+
+function processMessage(text) {
+  const command = text.toLowerCase().trim();
+
+  if (!command) return;
+
+  addMessage(text, "user");
+
+  if (
+    command.startsWith("लक्षात ठेव") ||
+    command.startsWith("आठवण ठेव")
+  ) {
+    const memory = text
+      .replace(/^लक्षात ठेव/i, "")
+      .replace(/^आठवण ठेव/i, "")
+      .trim();
+
+    if (!memory) {
+      reply("काय लक्षात ठेवायचं आहे ते सांग.");
+      return;
+    }
+
+    saveMemory(memory);
+    reply("ठीक आहे. ही माहिती माझ्या Memory मध्ये जतन केली.");
+  }
+
+  else if (
+    command.includes("माझी आठवण") ||
+    command.includes("काय लक्षात आहे")
+  ) {
+    const memories = getMemory();
+
+    if (!memories.length) {
+      reply("माझ्या Memory मध्ये अजून माहिती नाही.");
+    } else {
+      reply("माझ्याकडे " + memories.length +
+        " आठवणी जतन आहेत. View Memory मध्ये पाहू शकतोस.");
+      showMemory();
+    }
+  }
+
+  else if (
+    command.includes("नमस्कार") ||
+    command.includes("हॅलो") ||
+    command.includes("hello")
+  ) {
+    reply("नमस्कार! मी स्नेहित. बोल, काय मदत करू?");
+  }
+
+  else if (
+    command.includes("वेळ") ||
+    command.includes("किती वाजले")
+  ) {
+    reply("आत्ता वेळ आहे " +
+      new Date().toLocaleTimeString("mr-IN"));
+  }
+
+  else if (
+    command.includes("तारीख") ||
+    command.includes("आज कोणता दिवस")
+  ) {
+    reply("आजची तारीख आहे " +
+      new Date().toLocaleDateString("mr-IN"));
+  }
+
+  else if (
+    command.includes("तुझं नाव") ||
+    command.includes("तुझे नाव")
+  ) {
+    reply("माझं नाव स्नेहित आहे. मी तुझा AI सहाय्यक आहे.");
+  }
+
+  else if (
+    command.includes("तू कोण") ||
+    command.includes("कोण आहेस")
+  ) {
+    reply("मी स्नेहित AI आहे. तुझा डिजिटल सहाय्यक.");
+  }
+
+  else if (
+    command.includes("गुगल उघड") ||
+    command.includes("google open")
+  ) {
+    reply("गुगल उघडत आहे.");
+    window.open("https://www.google.com", "_blank");
+  }
+
+  else if (
+    command.includes("यूट्यूब उघड") ||
+    command.includes("youtube open")
+  ) {
+    reply("यूट्यूब उघडत आहे.");
+    window.open("https://www.youtube.com", "_blank");
+  }
+
+  else if (
+    command.includes("थांब") ||
+    command.includes("बंद हो")
+  ) {
+    stopVoice();
+    reply("ठीक आहे. मी थांबतो.");
+  }
+
+  else {
+    reply(
+      "हा प्रश्न समजण्यासाठी मला अजून AI Brain जोडावा लागेल. सध्या माझ्याकडे Local Commands उपलब्ध आहेत."
+    );
+  }
+}
+
+function sendMessage() {
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  input.value = "";
+  processMessage(text);
+}
+
+input.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+    sendMessage();
+  }
+});
+
+function startVoice() {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    reply("तुझ्या ब्राउझरमध्ये Voice Recognition उपलब्ध नाही.");
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "mr-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = function() {
+    statusText.textContent = "● LISTENING...";
+    statusText.style.color = "#00d9ff";
+    core.textContent = "●";
+  };
+
+  recognition.onresult = function(event) {
+    const text = event.results[0][0].transcript;
+    processMessage(text);
+  };
+
+  recognition.onerror = function() {
+    statusText.textContent = "● VOICE ERROR";
+  };
+
+  recognition.onend = function() {
+    statusText.textContent = "● SYSTEM ONLINE";
+    statusText.style.color = "#00e5a0";
+    core.textContent = "S";
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  if (recognition) {
+    recognition.stop();
+  }
+
+  if ("speechSynthesis" in window) {
+    speechSynthesis.cancel();
+  }
+
+  statusText.textContent = "● SYSTEM ONLINE";
+  core.textContent = "S";
+}
+
+document.getElementById("systemInfo").textContent =
+  "SNEHIT CORE: READY | MEMORY: " +
+  getMemory().length + " ITEMS";
+
+</script>
+</body>
+</html>
