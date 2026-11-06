@@ -1,1 +1,1 @@
-# APURV-AI
+# SNEHIT-AI
